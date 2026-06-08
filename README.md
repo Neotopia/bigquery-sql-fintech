@@ -13,7 +13,7 @@ Projet réalisé dans le cadre d'une montée en compétences vers des rôles **D
 bigquery-sql-fintech/
 └── sql/
     ├── 01_dataset_transactions.sql   → Création du jeu de données (inline, sans table)
-    ├── 02_window_functions_bases.sql → ROW_NUMBER, RANK
+    ├── 02_window_functions_bases.sql → Enrichir la table via des fonctions Window
 ```
 
 ---
@@ -34,7 +34,7 @@ bigquery-sql-fintech/
 | Fichier | Fonctions SQL |
 |---------|--------------|
 | `01_dataset_transactions.sql | 50 transactions fictives sur 5 clients, 3 mois, thème fintech (salaire, loyer, loisirs...) — auto-contenu, aucune table à créer
-| `02_window_functions_bases.sql` | `ROW_NUMBER()`, `RANK()`
+| `02_window_functions_bases.sql` | Trie et enrichissement de la table de donnée
 
 ---
 
