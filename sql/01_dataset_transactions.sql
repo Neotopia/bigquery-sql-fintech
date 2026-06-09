@@ -70,10 +70,6 @@ WITH transactions AS (
   SELECT 'TXN050', 'C005', DATE '2026-03-12',  -800.00, 'outgoing_transfer', 'rent'
 )
 
--- Display all transactions to verify the dataset
-SELECT *
-FROM transactions
-ORDER BY client_id, txn_date;
 
 -- ✅ Expected result: 50 rows, 5 clients, transactions from January to March 2026
 -- 💡 The "transactions" CTE will be reused in files 02 and 03 as the base dataset
