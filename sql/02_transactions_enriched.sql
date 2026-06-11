@@ -1,25 +1,19 @@
 -- ============================================================
--- FILE 01 : Simulated dataset – Bank transactions
+-- FILE 02 : Enriched transaction view
 -- ============================================================
--- Description : Creates a fictional financial transaction dataset
---               representing the activity of 5 clients over 3 months.
---               Used as the data source in all other files.
+-- Dataset : fictional bank transactions (5 clients, 3 months)
+-- Goal    : annotate each transaction with client-level context
+--           using window functions — cumulative balance, spending rank,
+--           transaction frequency, and more.
 --
--- Columns :
---   txn_id      → unique transaction identifier (TXN001–TXN050)
---   client_id   → client identifier (C001 to C005)
---   txn_date    → transaction date
---   amount      → amount in euros (positive = credit, negative = debit)
---   txn_type    → transaction type (incoming_transfer, card_payment, cash_withdrawal, outgoing_transfer)
---   category    → transaction category (salary, rent, groceries, transport, leisure, subscription)
---
--- Data distribution :
---   C001 → 10 transactions   C002 → 11 transactions   C003 → 12 transactions
---   C004 →  9 transactions   C005 →  8 transactions   Total → 50 transactions
+-- 💡 How to run: copy the entire file into BigQuery and run it.
+--    The dataset is defined inline via a CTE — no table needed.
 -- ============================================================
 
--- This CTE (Common Table Expression) defines the data directly inside the query.
--- No need to create a real table – you can copy-paste and run immediately.
+
+-- ============================================================
+-- DATASET — Inline CTE (copied from 01_dataset_transactions.sql)
+-- ============================================================
 
 WITH transactions AS (
 
@@ -85,10 +79,52 @@ WITH transactions AS (
 
 )
 
--- Display all transactions to verify the dataset
-SELECT *
-FROM transactions
-ORDER BY client_id, txn_date;
 
--- ✅ Expected result: 50 rows, 5 clients, transactions from January to March 2026
--- 💡 The "transactions" CTE will be reused in files 02 and 03 as the base dataset
+-- Row-level enrichment: each transaction is annotated with client-level context.
+-- No aggregation — all 50 source rows are preserved in the output.
+
+SELECT
+  client_id,
+  txn_id,
+  txn_date,
+  amount,
+  category,
+
+  -- Position of the transaction in the client's history (1 = oldest)
+  ROW_NUMBER() OVER w_client                               AS txn_rank,
+
+  -- Total number of known transactions for this client
+  COUNT(*) OVER w_client_total                             AS txn_count,
+
+  -- First and last transaction dates for this client
+  MIN(txn_date) OVER w_client_total                        AS first_txn_date,
+  MAX(txn_date) OVER w_client_total                        AS last_txn_date,
+
+  -- Running balance transaction by transaction (to identify spending spikes)
+  ROUND(SUM(amount) OVER w_balance, 2)                     AS cumulative_balance,
+
+  -- Amount of the previous transaction for the same client (to identify large jumps)
+  LAG(amount) OVER w_client                                AS previous_txn_amount,
+
+  -- Number of days since the previous transaction (spending frequency)
+  DATE_DIFF(
+    txn_date,
+    LAG(txn_date) OVER w_client,
+    DAY
+  )                                                        AS days_since_previous_txn,
+
+  -- Expense rank within the client's transactions (1 = largest expense, NULL for credits)
+  CASE
+    WHEN amount < 0
+    THEN DENSE_RANK() OVER (PARTITION BY client_id ORDER BY amount ASC)
+  END                                                      AS spending_rank
+
+FROM transactions
+
+WINDOW
+  w_client       AS (PARTITION BY client_id ORDER BY txn_date ASC),
+  w_client_total AS (PARTITION BY client_id),
+  w_balance      AS (PARTITION BY client_id ORDER BY txn_date ASC
+                     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+
+ORDER BY client_id, txn_date;
