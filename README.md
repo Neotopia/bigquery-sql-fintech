@@ -1,9 +1,9 @@
 # BigQuery SQL — Personal Finance Analysis (Fintech)
 
-SQL queries for analysing simulated personal finance data, written and commented in English.  
-Built as part of a skill progression toward **Data Analyst / Analytics Engineer** roles.
+SQL queries for analysing simulated personal finance data, written and commented in English.
+Personal project designed to deepen my analytical and data skills beyond web and digital analytics use cases.
 
-**Stack:** Google BigQuery · Standard SQL · Window Functions
+**Stack:** Google BigQuery · Standard SQL · Window Functions · Analytical SQL
 
 ---
 
@@ -15,6 +15,7 @@ This project explores a simulated dataset of 50 personal banking transactions ac
 - Which clients save the most relative to their income?
 - How do spending patterns differ across categories and income levels?
 - Which transactions represent unusual or high-value spend?
+- How is each client's spending trending month over month?
 
 ---
 
@@ -23,23 +24,19 @@ This project explores a simulated dataset of 50 personal banking transactions ac
 ```
 bigquery-sql-fintech/
 └── sql/
-    ├── 01_dataset_transactions.sql    → Self-contained dataset (50 rows, defined inline via CTE)
-    └── 02_window_functions_basics.sql → Dataset enrichment using window functions
+    ├── 01_dataset_transactions.sql   → Simulated dataset (50 transactions, 5 clients, inline CTE)
+    ├── 02_transactions_enriched.sql  → Row-level enrichment with window functions
+    └── 03_business_playbook.sql      → Business questions answered with analytical SQL
 ```
 
 ---
 
 ## How to Run
 
-1. Open [BigQuery Sandbox](https://console.cloud.google.com/bigquery)
-2. Create a new project if needed
-3. Open `01_dataset_transactions.sql` and run it to preview the raw dataset
-4. To run the window function analysis:
-   - Keep only the `WITH transactions AS (...)` block from file `01`
-   - Paste the content of file `02` directly below it
-   - Click **Run**
+Each file is **self-contained** — copy the full content into [BigQuery Sandbox](https://console.cloud.google.com/bigquery) and click **Run**. No table creation or CSV import needed. All data is defined inline via a `WITH` CTE.
 
-> All data is self-contained: defined directly inside a `WITH` CTE — no table creation or CSV import needed.
+> File `01` can be used to preview the raw dataset.  
+> Files `02` and `03` each embed the dataset and run independently.
 
 ---
 
@@ -47,12 +44,25 @@ bigquery-sql-fintech/
 
 | File | SQL Concepts |
 |---|---|
-| `01_dataset_transactions.sql` | CTE (`WITH`) |
-| `02_window_functions_basics.sql` | `ROW_NUMBER`, `RANK`, `LAG`, `SUM() OVER`, `AVG() OVER`, `FORMAT_DATE`, frame clauses (`ROWS BETWEEN`) |
+| `01_dataset_transactions.sql` | CTE (`WITH`), inline data generation |
+| `02_transactions_enriched.sql` | `ROW_NUMBER`, `LAG`, `DENSE_RANK`, `SUM() OVER`, `COUNT() OVER`, `MIN/MAX() OVER`, named `WINDOW` clause, `ROWS BETWEEN` frame |
+| `03_business_playbook.sql` | `GROUP BY` aggregation, conditional `SUM` (`CASE WHEN`), `SAFE_DIVIDE`, `FORMAT_DATE`, `LAG` on monthly aggregates, `AVG() OVER`, MoM trend analysis, customer segmentation |
+
+---
+
+## Business Playbook — Queries at a Glance
+
+| # | Business Question | Use Case |
+|---|---|---|
+| Q1 | Monthly cashflow per client | PFM dashboard, financial stress detection |
+| Q2 | Savings rate per client per month | Credit scoring, investment product targeting |
+| Q3 | Spending share per category | Customer profiling, rent burden flagging |
+| Q4 | Month-over-month spending trend | Over-indebtedness early warning |
+| Q5 | Anomalous transactions vs client baseline | Fraud detection, unusual spend alerts |
 
 ---
 
 ## Author
 
 **Lisa Momas** — Digital Analytics & Data  
-[LinkedIn](https://www.linkedin.com/in/lisa-momas-69518b177) · Transitioning toward Analytics Engineer / Data Analyst roles
+[LinkedIn](https://www.linkedin.com/in/lisa-momas-69518b177)
