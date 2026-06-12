@@ -41,4 +41,4 @@ bigquery-sql-fintech/
 ## Auteure
 
 **Lisa Momas** – Digital Analytics & Data  
-[LinkedIn](https://www.linkedin.com/in/lisa-momas-69518b177) · En reconversion vers Analytics Engineer / Data Analyst
+[LinkedIn](https://www.linkedin.com/in/lisa-momas)
